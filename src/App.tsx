@@ -11,6 +11,7 @@ import Admin from './pages/Admin';
 import ProductDetails from './pages/ProductDetails';
 import Auth from './pages/Auth';
 import Profile from './pages/Profile';
+import ThankYou from './pages/ThankYou';
 import { motion, AnimatePresence } from 'motion/react';
 import { useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
