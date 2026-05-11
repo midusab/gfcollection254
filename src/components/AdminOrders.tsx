@@ -166,7 +166,7 @@ export default function AdminOrders() {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                     <div className="space-y-1">
                       <p className="text-[8px] uppercase tracking-widest text-stone-400 font-black">Quantity</p>
                       <p className="text-xs font-bold text-primary">{order.items.length} Items</p>

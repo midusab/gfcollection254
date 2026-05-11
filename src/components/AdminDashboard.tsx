@@ -89,17 +89,17 @@ export default function AdminDashboard() {
         <Icon size={128} />
       </div>
       <div className="flex items-center gap-4 mb-6">
-        <div className={cn("p-3 rounded-2xl transition-colors duration-500", color.replace('text-', 'bg-').replace('500', '50').replace('600', '50'))}>
-          <Icon size={20} className={color} />
+        <div className={cn("p-2.5 rounded-xl transition-colors duration-500", color.replace('text-', 'bg-').replace('500', '50').replace('600', '50'))}>
+          <Icon size={18} className={color} />
         </div>
-        <p className="text-[10px] uppercase tracking-[0.3em] font-black text-stone-400">{title}</p>
+        <p className="text-[9px] uppercase tracking-[0.2em] font-black text-stone-300">{title}</p>
       </div>
-      <div className="flex items-end justify-between relative z-10">
-        <h3 className="text-3xl sm:text-4xl font-display text-primary tracking-tight">
+      <div className="flex items-end justify-between relative z-10 gap-2">
+        <h3 className="text-2xl sm:text-4xl font-display text-primary tracking-tight break-all">
           {typeof value === 'number' && (title.includes('Revenue') || title.includes('Sales')) ? `KES ${value.toLocaleString()}` : value}
         </h3>
         {trend && (
-           <div className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black tracking-widest", trend > 0 ? "bg-emerald-50 text-emerald-600" : "bg-stone-50 text-stone-400")}>
+           <div className={cn("flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-black tracking-widest flex-shrink-0", trend > 0 ? "bg-emerald-50 text-emerald-600" : "bg-stone-50 text-stone-400")}>
              {trend > 0 ? <TrendingUp size={12} /> : <Clock size={12} />}
              <span>{trend > 0 ? `+${trend}%` : 'Stable'}</span>
            </div>

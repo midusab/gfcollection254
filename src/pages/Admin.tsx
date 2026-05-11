@@ -100,7 +100,7 @@ export default function Admin() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 flex">
+    <div className="min-h-screen bg-stone-50 flex overflow-x-hidden">
       {/* Sidebar */}
       <aside 
         className={cn(
@@ -187,11 +187,11 @@ export default function Admin() {
               {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
             <div className="h-8 w-px bg-stone-100 hidden sm:block" />
-            <div className="hidden sm:block">
-              <h2 className="text-xs uppercase tracking-[0.3em] font-black text-stone-300">Status </h2>
+            <div className="hidden lg:block">
+              <h2 className="text-[8px] uppercase tracking-[0.3em] font-black text-stone-300">System</h2>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-bold text-primary uppercase tracking-widest leading-none">System Online</span>
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[9px] font-bold text-primary uppercase tracking-widest leading-none">Online</span>
               </div>
             </div>
           </div>
@@ -203,9 +203,9 @@ export default function Admin() {
             </div>
             <div className="h-8 w-px bg-stone-100" />
             <div className="flex items-center gap-3">
-              <div className="text-right hidden md:block">
-                <p className="text-xs font-bold text-primary uppercase tracking-widest">{user?.displayName || 'Admin'}</p>
-                <p className="text-[10px] text-stone-400 font-medium">Administrator</p>
+              <div className="text-right hidden lg:block">
+                <p className="text-[10px] font-bold text-primary uppercase tracking-widest leading-tight">{user?.displayName || 'Admin'}</p>
+                <p className="text-[8px] text-stone-400 font-medium uppercase tracking-tighter">Administrator</p>
               </div>
               <div className="w-10 h-10 bg-stone-100 rounded-xl overflow-hidden border border-stone-100">
                 <img src={`https://ui-avatars.com/api/?name=${user?.displayName || 'Admin'}&background=c5a059&color=fff`} alt="Admin" className="w-full h-full object-cover" />
