@@ -75,11 +75,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
     try {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      console.log("Google sign in success:", result.user.email);
     } catch (error: any) {
-      if (error.code !== 'auth/cancelled-popup-request') {
-        console.error("Google sign in failed:", error);
-      }
+      console.error("Google sign in failed code:", error.code);
+      console.error("Google sign in failed message:", error.message);
+      throw error; // Re-throw to handle in UI
     } finally {
       setSignInLoading(false);
     }
