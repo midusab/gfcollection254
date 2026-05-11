@@ -8,6 +8,7 @@ import { db } from '../lib/firebase';
 import { products } from '../mockData';
 import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
+import { PAYMENT_DETAILS } from '../constants/payment';
 
 export default function Profile() {
   const { user, logout, loading } = useAuth();
