@@ -44,6 +44,9 @@ export default function Admin() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
 
+  // Admin authorization
+  const isAdmin = user?.email === 'gfcollection@gmail.com'; 
+
   // Handle mobile responsiveness
   useEffect(() => {
     const handleResize = () => {
@@ -101,8 +104,7 @@ export default function Admin() {
     };
   }, [isAdmin]);
 
-  // Admin authorization
-  const isAdmin = user?.email === 'gfcollection@gmail.com'; 
+  // Layout and Navigation
 
   if (!isAdmin) {
     return (
