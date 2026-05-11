@@ -295,10 +295,18 @@ export default function AdminOrders() {
                         Verify
                       </button>
                     </div>
-                    {selectedOrder.mpesaCode && (
-                      <p className="text-[9px] text-emerald-500 font-bold uppercase tracking-widest flex items-center gap-1">
-                        <CheckCircle2 size={10} /> Verified: {selectedOrder.mpesaCode}
-                      </p>
+                    {selectedOrder.mpesaCode ? (
+                      <div className="p-4 bg-emerald-50 border border-emerald-100 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <p className="text-[9px] text-emerald-600 font-black uppercase tracking-widest">Transaction Recorded</p>
+                          <span className="text-[8px] bg-emerald-500 text-white px-2 py-0.5 rounded-none font-black">{selectedOrder.mpesaCode}</span>
+                        </div>
+                        <p className="text-[8px] text-emerald-500 uppercase font-bold tracking-widest">Awaiting Admin Confirmation to mark as Paid.</p>
+                      </div>
+                    ) : (
+                      <div className="p-4 bg-amber-50 border border-amber-100">
+                        <p className="text-[9px] text-amber-600 font-black uppercase tracking-widest text-center italic">No M-Pesa code submitted by customer yet.</p>
+                      </div>
                     )}
                   </div>
 

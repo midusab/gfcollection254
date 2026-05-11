@@ -37,6 +37,7 @@ function AnimatedRoutes() {
           <Route path="/auth" element={<Auth />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/product/:id" element={<ProductDetails />} />
+          <Route path="/thank-you" element={<ThankYou />} />
           {/* Add more routes as needed */}
         </Routes>
       </motion.div>

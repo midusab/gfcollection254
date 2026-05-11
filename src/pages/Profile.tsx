@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, Calendar, Heart, ShoppingBag, Settings, LogOut, Loader2, Camera } from 'lucide-react';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { User, Mail, Calendar, Heart, ShoppingBag, Settings, LogOut, Loader2, Camera, CreditCard } from 'lucide-react';
+import { collection, query, where, onSnapshot, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { products } from '../mockData';
 import { Link } from 'react-router-dom';
@@ -245,21 +245,27 @@ export default function Profile() {
                                 Placed on {order.createdAt?.toDate().toLocaleDateString('en-KE', { day: '2-digit', month: 'short', year: 'numeric' })}
                               </p>
                             </div>
-                            <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
-                              <div className="text-right">
-                                <p className="text-[8px] text-gray-400 uppercase tracking-widest mb-1">Total Amount</p>
-                                <p className="text-sm font-bold text-primary">KES {order.total.toLocaleString()}</p>
+                              <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                                <div className="text-right">
+                                  <p className="text-[8px] text-gray-400 uppercase tracking-widest mb-1">Total Amount</p>
+                                  <p className="text-sm font-bold text-primary">KES {order.total.toLocaleString()}</p>
+                                </div>
+                                <div className="flex flex-col items-end gap-1">
+                                  <span className={cn(
+                                    "px-4 py-1.5 rounded-none text-[8px] font-black uppercase tracking-widest border shadow-sm",
+                                    order.status === 'Delivered' ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
+                                    order.status === 'Cancelled' ? "bg-red-50 text-red-600 border-red-100" :
+                                    order.status === 'Paid' ? "bg-blue-50 text-blue-600 border-blue-100" :
+                                    "bg-amber-50 text-amber-600 border-amber-100 animate-pulse"
+                                  )}>
+                                    {order.mpesaCode && order.status === 'Pending Confirmation' ? 'Verifying Payment' : order.status}
+                                  </span>
+                                  {order.mpesaCode && (
+                                    <p className="text-[7px] text-emerald-500 font-bold uppercase tracking-widest">Ref: {order.mpesaCode}</p>
+                                  )}
+                                </div>
                               </div>
-                              <span className={cn(
-                                "px-4 py-1.5 rounded-none text-[8px] font-black uppercase tracking-widest border shadow-sm",
-                                order.status === 'Delivered' ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
-                                order.status === 'Cancelled' ? "bg-red-50 text-red-600 border-red-100" :
-                                "bg-amber-50 text-amber-600 border-amber-100 animate-pulse"
-                              )}>
-                                {order.status}
-                              </span>
                             </div>
-                          </div>
 
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="space-y-4">
@@ -309,6 +315,53 @@ export default function Profile() {
                                   </div>
                                 </div>
                               </div>
+
+                              {/* M-Pesa Verification Section */}
+                              {order.status === 'Pending Confirmation' && !order.mpesaCode && (
+                                <div className="mt-8 p-6 bg-emerald-50/50 border border-emerald-100 space-y-4">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center">
+                                      <CreditCard size={16} />
+                                    </div>
+                                    <div>
+                                      <p className="text-[10px] font-black text-emerald-700 uppercase tracking-widest">Payment Required</p>
+                                      <p className="text-[8px] text-emerald-600 uppercase tracking-widest">Submit M-Pesa code to verify</p>
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <input 
+                                      type="text" 
+                                      placeholder="ENTER MPESA CODE (e.g. SAK9...)"
+                                      id={`mpesa-input-${order.id}`}
+                                      className="flex-1 px-4 py-2 bg-white border border-emerald-200 text-xs font-bold uppercase tracking-widest focus:outline-none focus:border-emerald-500"
+                                    />
+                                    <button 
+                                      onClick={async () => {
+                                        const input = document.getElementById(`mpesa-input-${order.id}`) as HTMLInputElement;
+                                        const code = input.value.toUpperCase().trim();
+                                        if (code.length < 8) return alert('Please enter a valid M-Pesa transaction code');
+                                        
+                                        try {
+                                          const orderRef = doc(db, 'orders', order.id);
+                                          await updateDoc(orderRef, {
+                                            mpesaCode: code,
+                                            updatedAt: serverTimestamp()
+                                          });
+                                          alert('Code submitted! Our team will verify it shortly.');
+                                        } catch (error) {
+                                          console.error('Submission failed:', error);
+                                        }
+                                      }}
+                                      className="bg-emerald-500 text-white px-6 py-2 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all"
+                                    >
+                                      Submit
+                                    </button>
+                                  </div>
+                                  <p className="text-[7px] text-emerald-600 leading-relaxed font-bold uppercase tracking-tighter">
+                                    * Payments are processed manually via Pochi la Biashara. Please allow 5-15 mins for verification.
+                                  </p>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>

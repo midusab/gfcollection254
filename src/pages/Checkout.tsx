@@ -339,14 +339,20 @@ Please confirm availability and payment details.`;
                 </div>
               </div>
 
-              <div className="bg-stone-50 p-4 rounded-xl space-y-2 border border-stone-100">
-                <p className="text-[9px] font-bold uppercase tracking-widest text-gold">Next Steps:</p>
-                <ol className="text-[10px] text-gray-500 space-y-1 pl-4 list-decimal">
-                  <li>Click confirm to open WhatsApp</li>
-                  <li>Our team will verify availability</li>
-                  <li>Receive M-Pesa payment details</li>
-                  <li>Send code to complete order</li>
+              <div className="bg-emerald-50/50 p-6 rounded-none space-y-4 border border-emerald-100">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="text-emerald-500" size={16} />
+                  <p className="text-[10px] font-black uppercase tracking-widest text-emerald-700">Trusted Payment Protocol:</p>
+                </div>
+                <ol className="text-[10px] text-emerald-600 space-y-2 pl-4 list-decimal font-bold uppercase tracking-tighter">
+                  <li>Place your order to receive a unique Order ID.</li>
+                  <li>Wait for WhatsApp confirmation of stock availability.</li>
+                  <li>Pay via Pochi la Biashara / Paybill as directed.</li>
+                  <li>Submit your M-Pesa Code in your Profile for instant verification.</li>
                 </ol>
+                <div className="pt-2 border-t border-emerald-100">
+                   <p className="text-[8px] text-emerald-500 italic">* Manual verification ensures zero ghost payments and maximum security for your funds.</p>
+                </div>
               </div>
             </div>
           </div>
