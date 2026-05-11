@@ -94,12 +94,12 @@ export default function AdminDashboard() {
         </div>
         <p className="text-[9px] uppercase tracking-[0.2em] font-black text-stone-300">{title}</p>
       </div>
-      <div className="flex items-end justify-between relative z-10 gap-2">
-        <h3 className="text-2xl sm:text-4xl font-display text-primary tracking-tight break-all">
+      <div className="flex items-end justify-between relative z-10 gap-4">
+        <h3 className="text-xl sm:text-2xl font-display text-primary tracking-tight">
           {typeof value === 'number' && (title.includes('Revenue') || title.includes('Sales')) ? `KES ${value.toLocaleString()}` : value}
         </h3>
         {trend && (
-           <div className={cn("flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-black tracking-widest flex-shrink-0", trend > 0 ? "bg-emerald-50 text-emerald-600" : "bg-stone-50 text-stone-400")}>
+           <div className={cn("flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black tracking-widest flex-shrink-0", trend > 0 ? "bg-emerald-50 text-emerald-600" : "bg-stone-50 text-stone-400")}>
              {trend > 0 ? <TrendingUp size={12} /> : <Clock size={12} />}
              <span>{trend > 0 ? `+${trend}%` : 'Stable'}</span>
            </div>
