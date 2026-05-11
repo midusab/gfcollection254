@@ -192,7 +192,7 @@ export default function Admin() {
         </header>
 
         {/* Viewport */}
-        <div className="p-8 lg:p-12">
+        <div className="p-4 sm:p-8 lg:p-12">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeModule}

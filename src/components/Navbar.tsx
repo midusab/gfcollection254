@@ -44,14 +44,11 @@ export default function Navbar() {
     { name: 'New In', path: '/shop?new=true' },
     { 
       name: 'Dresses', 
-      path: '/shop?category=Dresses',
+      path: '/shop?category=Clothing',
       dropdown: [
-        { name: 'Office Dresses', path: '/shop?category=Clothing&subcategory=Office Dresses' },
-        { name: 'Dinner Dresses', path: '/shop?category=Clothing&subcategory=Dinner Dresses' },
-        { name: 'Event Dresses', path: '/shop?category=Clothing&subcategory=Event Dresses' },
-        { name: 'Maxi Dresses', path: '/shop?category=Clothing&subcategory=Maxi Dresses' },
-        { name: 'Bodycon Dresses', path: '/shop?category=Clothing&subcategory=Bodycon Dresses' },
-        { name: 'Casual Dresses', path: '/shop?category=Clothing&subcategory=Casual Dresses' },
+        { name: 'Official', path: '/shop?category=Clothing&subcategory=Official' },
+        { name: 'Casuals', path: '/shop?category=Clothing&subcategory=Casuals' },
+        { name: 'Photoshoot', path: '/shop?category=Clothing&subcategory=Photoshoot' },
         { name: 'Birthday Dresses', path: '/shop?category=Clothing&subcategory=Birthday Dresses' },
         { name: 'New Arrivals', path: '/shop?new=true' },
       ]
@@ -65,7 +62,6 @@ export default function Navbar() {
         { name: 'Sneakers', path: '/shop?category=Shoes&subcategory=Sneakers' },
         { name: 'Sandals', path: '/shop?category=Shoes&subcategory=Sandals' },
         { name: 'Boots', path: '/shop?category=Shoes&subcategory=Boots' },
-        { name: 'Luxury Heels', path: '/shop?category=Shoes&subcategory=Luxury Heels' },
         { name: 'Trending Shoes', path: '/shop?sort=trending' },
       ]
     },
@@ -86,13 +82,11 @@ export default function Navbar() {
       name: 'Collections', 
       path: '/shop',
       dropdown: [
-        { name: 'Boss Lady Collection', path: '/shop?collection=BossLady' },
-        { name: 'Date Night Collection', path: '/shop?collection=DateNight' },
-        { name: 'Wedding Guest Looks', path: '/shop?collection=WeddingGuest' },
-        { name: 'Campus Fashion', path: '/shop?collection=Campus' },
-        { name: 'Soft Girl Collection', path: '/shop?collection=SoftGirl' },
-        { name: 'Luxury Queen Collection', path: '/shop?collection=LuxuryQueen' },
-        { name: 'Weekend Fits', path: '/shop?collection=Weekend' },
+        { name: 'The Executive Suite', path: '/shop?search=official' },
+        { name: 'Everyday Casuals', path: '/shop?search=casual' },
+        { name: 'Gala & Photoshoot', path: '/shop?search=photoshoot' },
+        { name: 'Birthday Luxe', path: '/shop?search=birthday' },
+        { name: 'The Accessories Edit', path: '/shop?category=Accessories' },
       ]
     },
     { name: 'Best Sellers', path: '/shop?sort=best' },

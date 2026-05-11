@@ -128,35 +128,38 @@ export default function AdminCategories() {
 
       <div className="grid grid-cols-1 gap-6">
         {categories.map((cat) => (
-          <div key={cat.id} className="bg-white luxury-shadow overflow-hidden group border border-stone-50">
-            <div className="p-6 flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <div className="w-16 h-16 bg-stone-50 rounded-xl overflow-hidden flex-shrink-0">
+          <div key={cat.id} className="bg-white luxury-shadow overflow-hidden group border border-stone-50 hover:border-gold/20 transition-all duration-500">
+            <div className="p-8 flex items-center justify-between">
+              <div className="flex items-center gap-8">
+                <div className="w-20 h-20 bg-stone-50 rounded-2xl overflow-hidden flex-shrink-0 border border-stone-100 group-hover:border-gold/20 transition-colors">
                   {cat.imageUrl ? (
-                    <img src={cat.imageUrl} alt={cat.name} className="w-full h-full object-cover" />
+                    <img src={cat.imageUrl} alt={cat.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-stone-200">
-                      <Layers size={24} />
+                      <Layers size={32} strokeWidth={1} />
                     </div>
                   )}
                 </div>
                 <div>
-                  <h3 className="text-xl font-display text-primary">{cat.name}</h3>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-gold">{cat.subcategories.length} Subcategories</p>
+                  <h3 className="text-2xl font-display text-primary mb-1">{cat.name}</h3>
+                  <div className="flex items-center gap-3">
+                    <div className="w-1.5 h-1.5 rounded-full bg-gold" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">{cat.subcategories.length} Specialized Subcategories</p>
+                  </div>
                 </div>
               </div>
               
               <div className="flex items-center gap-4">
                 <button 
                   onClick={() => setExpandedId(expandedId === cat.id ? null : cat.id)}
-                  className="p-2 hover:bg-stone-50 text-stone-400 transition-colors"
+                  className="p-3 bg-stone-50 rounded-xl text-stone-400 hover:text-gold hover:bg-stone-100 transition-all"
                 >
                   {expandedId === cat.id ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                 </button>
-                <div className="h-8 w-px bg-stone-100 mx-2" />
+                <div className="h-10 w-px bg-stone-100 mx-2" />
                 <button 
                   onClick={() => { setEditingCategory(cat); setFormData(cat); setIsModalOpen(true); }}
-                  className="p-2 hover:bg-stone-50 text-primary transition-colors"
+                  className="p-3 bg-stone-50 rounded-xl text-primary hover:text-gold hover:bg-stone-100 transition-all"
                 >
                   <Edit2 size={18} />
                 </button>
@@ -167,7 +170,7 @@ export default function AdminCategories() {
                       showNotification('Category deleted', 'success');
                     }
                   }}
-                  className="p-2 hover:bg-red-50 text-red-400 transition-colors"
+                  className="p-3 bg-stone-50 rounded-xl text-stone-400 hover:text-red-500 hover:bg-red-50 transition-all"
                 >
                   <Trash2 size={18} />
                 </button>

@@ -26,16 +26,17 @@ interface Product {
   tags: string[];
 }
 
-const SUBCATEGORIES: Record<string, string[]> = {
-  'Clothing': ['Dinner Dresses', 'Office Dresses', 'Event Dresses', 'Birthday Dresses', 'Bodycon Dresses', 'Maxi Dresses', 'Casual Dresses'],
-  'Shoes': ['Heels', 'Official Shoes', 'Sneakers', 'Sandals', 'Boots', 'Luxury Heels'],
-  'Bags': ['Handbags', 'Office Bags', 'Mini Bags', 'Luxury Bags', 'Crossbody Bags', 'Party Bags', 'Travel Bags'],
-  'Accessories': ['Jewelry', 'Belts', 'Hats', 'Others']
-};
+interface Category {
+  id: string;
+  name: string;
+  subcategories: string[];
+}
 
 export default function AdminProducts() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const { showNotification } = useNotification();
@@ -91,6 +92,19 @@ export default function AdminProducts() {
       unsubscribe();
       clearTimeout(timeoutId);
     };
+  }, []);
+
+  useEffect(() => {
+    const q = query(collection(db, 'categories'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const cats = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Category[];
+      setCategories(cats);
+      setCategoriesLoading(false);
+    });
+    return () => unsubscribe();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -210,10 +224,9 @@ export default function AdminProducts() {
           className="px-6 py-3 bg-white border border-stone-100 luxury-shadow-sm focus:outline-none focus:border-gold text-xs font-bold uppercase tracking-widest"
         >
           <option value="All">All Categories</option>
-          <option value="Clothing">Clothing</option>
-          <option value="Accessories">Accessories</option>
-          <option value="Bags">Bags</option>
-          <option value="Shoes">Shoes</option>
+          {categories.map(cat => (
+            <option key={cat.id} value={cat.name}>{cat.name}</option>
+          ))}
         </select>
       </div>
 
@@ -226,52 +239,57 @@ export default function AdminProducts() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white p-6 luxury-shadow group relative overflow-hidden"
+              className="bg-white p-6 luxury-shadow group relative overflow-hidden border border-stone-50 hover:border-gold/20 transition-all duration-500"
             >
               <div className="flex gap-6">
-                <div className="w-24 h-32 bg-stone-100 overflow-hidden relative">
+                <div className="w-24 h-36 bg-stone-50 overflow-hidden relative border border-stone-100 flex-shrink-0">
                   <img src={product.image} alt={product.name} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
                   {product.onSale && (
-                    <div className="absolute top-0 right-0 bg-gold text-white px-2 py-1 text-[8px] font-black uppercase tracking-widest">Sale</div>
+                    <div className="absolute top-0 right-0 bg-red-500 text-white px-2.5 py-1 text-[8px] font-black uppercase tracking-widest">Sale</div>
                   )}
                 </div>
-                <div className="flex-1 space-y-2">
-                  <div className="flex justify-between items-start">
-                    <p className="text-[8px] uppercase tracking-widest font-black text-stone-400">{product.category}</p>
-                    <div className="flex gap-2">
-                       {product.isFeatured && <Star size={12} className="text-gold fill-gold" />}
-                       {product.isBestSeller && <TrendingUp size={12} className="text-primary" />}
+                <div className="flex-1 flex flex-col justify-between py-1">
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-start">
+                      <p className="text-[9px] uppercase tracking-[0.3em] font-black text-gold">{product.category}</p>
+                      <div className="flex gap-2">
+                         {product.isFeatured && <Star size={12} className="text-gold fill-gold" />}
+                         {product.isBestSeller && <TrendingUp size={12} className="text-primary" />}
+                      </div>
+                    </div>
+                    <h4 className="font-display text-xl text-primary leading-tight group-hover:text-gold transition-colors">{product.name}</h4>
+                    <div className="flex items-center gap-3">
+                      <p className="text-lg font-display text-primary">KES {product.price.toLocaleString()}</p>
+                      {product.discountPrice && (
+                         <p className="text-xs text-stone-300 line-through">KES {product.discountPrice.toLocaleString()}</p>
+                      )}
                     </div>
                   </div>
-                  <h4 className="font-display text-lg text-primary line-clamp-1">{product.name}</h4>
                   <div className="flex items-center gap-3">
-                    <p className="text-sm font-display text-gold">KES {product.price.toLocaleString()}</p>
-                    {product.discountPrice && (
-                       <p className="text-[10px] text-stone-300 line-through">KES {product.discountPrice.toLocaleString()}</p>
-                    )}
+                    <div className={cn(
+                      "w-2 h-2 rounded-full",
+                      product.stockQuantity < 5 ? "bg-red-500 animate-pulse" : "bg-emerald-500"
+                    )} />
+                    <p className="text-[9px] uppercase tracking-[0.2em] font-black text-stone-400">
+                      Inventory: {product.stockQuantity} Units
+                    </p>
                   </div>
-                  <p className={cn(
-                    "text-[8px] uppercase tracking-[0.2em] font-black",
-                    product.stockQuantity < 5 ? "text-red-500" : "text-stone-300"
-                  )}>
-                    Stock: {product.stockQuantity} Units
-                  </p>
                 </div>
               </div>
 
               <div className="mt-6 pt-6 border-t border-stone-50 flex justify-between items-center">
                 <span className={cn(
-                  "px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border",
+                  "px-4 py-1.5 rounded-none text-[8px] font-black uppercase tracking-widest border transition-colors",
                   product.status === 'published' ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
                   product.status === 'draft' ? "bg-amber-50 text-amber-600 border-amber-100" : "bg-red-50 text-red-600 border-red-100"
                 )}>
                   {product.status.replace('_', ' ')}
                 </span>
                 <div className="flex gap-2">
-                  <button onClick={() => openEdit(product)} className="p-2 text-stone-400 hover:text-gold transition-colors">
+                  <button onClick={() => openEdit(product)} className="p-2.5 bg-stone-50 text-stone-400 hover:text-gold hover:bg-stone-100 transition-all rounded-lg">
                     <Edit2 size={16} />
                   </button>
-                  <button onClick={() => handleDelete(product.id)} className="p-2 text-stone-400 hover:text-red-500 transition-colors">
+                  <button onClick={() => handleDelete(product.id)} className="p-2.5 bg-stone-50 text-stone-400 hover:text-red-500 hover:bg-red-50 transition-all rounded-lg">
                     <Trash2 size={16} />
                   </button>
                 </div>
@@ -363,19 +381,20 @@ export default function AdminProducts() {
                           <select 
                             value={formData.category}
                             onChange={(e) => {
-                              const newCat = e.target.value;
+                              const newCatName = e.target.value;
+                              const category = categories.find(c => c.name === newCatName);
                               setFormData({
                                 ...formData, 
-                                category: newCat,
-                                subcategory: SUBCATEGORIES[newCat]?.[0] || ''
+                                category: newCatName,
+                                subcategory: category?.subcategories[0] || ''
                               });
                             }}
                             className="w-full bg-stone-50 border border-stone-100 p-4 text-sm focus:outline-none focus:border-gold"
                           >
-                            <option value="Clothing">Clothing</option>
-                            <option value="Accessories">Accessories</option>
-                            <option value="Bags">Bags</option>
-                            <option value="Shoes">Shoes</option>
+                            <option value="">Select Category</option>
+                            {categories.map(cat => (
+                              <option key={cat.id} value={cat.name}>{cat.name}</option>
+                            ))}
                           </select>
                         </div>
                         <div className="space-y-2">
@@ -385,7 +404,8 @@ export default function AdminProducts() {
                             onChange={(e) => setFormData({...formData, subcategory: e.target.value})}
                             className="w-full bg-stone-50 border border-stone-100 p-4 text-sm focus:outline-none focus:border-gold"
                           >
-                            {formData.category && SUBCATEGORIES[formData.category]?.map(sub => (
+                            <option value="">Select Subcategory</option>
+                            {categories.find(c => c.name === formData.category)?.subcategories.map(sub => (
                               <option key={sub} value={sub}>{sub}</option>
                             ))}
                           </select>

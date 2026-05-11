@@ -26,25 +26,25 @@ import { cn } from '../lib/utils';
 
 const collections = [
   { 
-    name: 'Office Wear', 
+    name: 'Official', 
     description: 'Empower your professional journey with executive elegance.',
     image: 'https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?q=80&w=800&auto=format&fit=crop',
     icon: Briefcase,
     color: 'bg-stone-100'
   },
   { 
-    name: 'Dinner Dresses', 
-    description: 'Captivate the room in our exquisite evening gowns.',
-    image: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=800&auto=format&fit=crop',
-    icon: GlassWater,
-    color: 'bg-primary text-white'
+    name: 'Casuals', 
+    description: 'Effortless style for your everyday moments.',
+    image: 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?q=80&w=800&auto=format&fit=crop',
+    icon: Zap,
+    color: 'bg-gold/10'
   },
   { 
-    name: 'Event Wear', 
-    description: 'Breathtaking styles for weddings, galas and special moments.',
-    image: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=800&auto=format&fit=crop',
+    name: 'Photoshoot', 
+    description: 'Captivate the lens in our exquisite photoshoot gowns.',
+    image: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=800&auto=format&fit=crop',
     icon: PartyPopper,
-    color: 'bg-gold/10'
+    color: 'bg-primary text-white'
   }
 ];
 

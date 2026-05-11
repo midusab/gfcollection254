@@ -6,20 +6,21 @@ import { ProductCard } from '../components/ProductCard';
 import { Filter, Search, X, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-const CATEGORIES = ['All', 'Clothing', 'Accessories', 'Bags', 'Shoes'];
-
-const SUBCATEGORIES: Record<string, string[]> = {
-  'Clothing': ['Dinner Dresses', 'Office Dresses', 'Event Dresses', 'Birthday Dresses', 'Bodycon Dresses', 'Maxi Dresses', 'Casual Dresses'],
-  'Shoes': ['Heels', 'Official Shoes', 'Sneakers', 'Sandals', 'Boots', 'Luxury Heels'],
-  'Bags': ['Handbags', 'Office Bags', 'Mini Bags', 'Luxury Bags', 'Crossbody Bags', 'Party Bags', 'Travel Bags'],
-  'Accessories': ['Jewelry', 'Belts', 'Hats', 'Others']
-};
+interface Category {
+  id: string;
+  name: string;
+  subcategories: string[];
+  isActive: boolean;
+  order: number;
+}
 
 export default function Shop() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   
   const currentCategory = searchParams.get('category') || 'All';
   const currentSubcategory = searchParams.get('subcategory') || 'All';
@@ -43,6 +44,24 @@ export default function Shop() {
     }, (error) => {
       console.error('Firestore Error:', error);
       setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const q = query(
+      collection(db, 'categories'),
+      where('isActive', '==', true)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const cats = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Category[];
+      setCategories(cats.sort((a, b) => a.order - b.order));
+      setCategoriesLoading(false);
     });
 
     return () => unsubscribe();
@@ -118,27 +137,45 @@ export default function Shop() {
             <div>
               <h3 className="font-bold text-gray-900 mb-4 uppercase tracking-wider text-xs">Categories</h3>
               <div className="space-y-4">
-                {CATEGORIES.map(cat => (
-                  <div key={cat} className="space-y-2">
+                <div className="space-y-2">
+                  <button
+                    onClick={() => toggleCategory('All')}
+                    className={`w-full text-left px-4 py-2 rounded-lg transition-all ${
+                      currentCategory === 'All' 
+                        ? 'bg-primary text-white font-bold shadow-md' 
+                        : 'text-gray-600 hover:bg-white hover:text-primary'
+                    }`}
+                  >
+                    All
+                  </button>
+                </div>
+
+                {categoriesLoading ? (
+                  <div className="flex items-center gap-2 px-4 py-2 text-stone-300">
+                    <Loader2 size={14} className="animate-spin" />
+                    <span className="text-[10px] uppercase tracking-widest font-bold">Syncing...</span>
+                  </div>
+                ) : categories.map(cat => (
+                  <div key={cat.id} className="space-y-2">
                     <button
-                      onClick={() => toggleCategory(cat)}
+                      onClick={() => toggleCategory(cat.name)}
                       className={`w-full text-left px-4 py-2 rounded-lg transition-all ${
-                        currentCategory === cat 
+                        currentCategory === cat.name 
                           ? 'bg-primary text-white font-bold shadow-md' 
                           : 'text-gray-600 hover:bg-white hover:text-primary'
                       }`}
                     >
-                      {cat}
+                      {cat.name}
                     </button>
                     
                     {/* Subcategories */}
-                    {currentCategory === cat && cat !== 'All' && (
+                    {currentCategory === cat.name && cat.subcategories.length > 0 && (
                       <motion.div 
                         initial={{ opacity: 0, x: 10 }}
                         animate={{ opacity: 1, x: 0 }}
                         className="pl-4 space-y-1"
                       >
-                        {SUBCATEGORIES[cat]?.map(sub => (
+                        {cat.subcategories.map(sub => (
                           <button
                             key={sub}
                             onClick={() => {

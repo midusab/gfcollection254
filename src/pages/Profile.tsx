@@ -13,6 +13,8 @@ export default function Profile() {
   const navigate = useNavigate();
   const [wishlistCount, setWishlistCount] = useState(0);
   const [wishlistItems, setWishlistItems] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'wishlist' | 'orders'>('overview');
 
   useEffect(() => {
@@ -25,7 +27,7 @@ export default function Profile() {
     if (!user) return;
 
     const wishlistRef = collection(db, 'wishlists', user.uid, 'items');
-    const unsubscribe = onSnapshot(wishlistRef, (snapshot) => {
+    const wishlistUnsubscribe = onSnapshot(wishlistRef, (snapshot) => {
       setWishlistCount(snapshot.size);
       const items = snapshot.docs.map(doc => {
         const item = doc.data();
@@ -34,7 +36,21 @@ export default function Profile() {
       setWishlistItems(items);
     });
 
-    return unsubscribe;
+    const ordersRef = collection(db, 'orders');
+    const ordersQuery = query(ordersRef, where('userId', '==', user.uid));
+    const ordersUnsubscribe = onSnapshot(ordersQuery, (snapshot) => {
+      const ordersData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })).sort((a: any, b: any) => b.createdAt?.toMillis() - a.createdAt?.toMillis());
+      setOrders(ordersData);
+      setOrdersLoading(false);
+    });
+
+    return () => {
+      wishlistUnsubscribe();
+      ordersUnsubscribe();
+    };
   }, [user]);
 
   if (loading || !user) {
@@ -155,7 +171,7 @@ export default function Profile() {
                       <div className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Wishlist Items</div>
                     </div>
                     <div className="p-6 border border-beige bg-stone-50/50 text-center space-y-2">
-                      <div className="text-2xl font-display text-primary">0</div>
+                      <div className="text-2xl font-display text-primary">{orders.length}</div>
                       <div className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Orders Placed</div>
                     </div>
                     <div className="p-6 border border-beige bg-stone-50/50 text-center space-y-2">
@@ -210,10 +226,105 @@ export default function Profile() {
               )}
 
               {activeTab === 'orders' && (
-                <div className="text-center py-20">
-                  <ShoppingBag className="mx-auto text-stone-200 mb-4" size={48} />
-                  <p className="text-sm text-gray-500 font-light mb-4">You haven't placed any orders yet.</p>
-                  <p className="text-[10px] uppercase tracking-widest text-gold font-bold">Start your luxury journey today</p>
+                <div className="space-y-8">
+                  <h3 className="text-2xl font-display text-primary mb-8">Order History</h3>
+                  
+                  {ordersLoading ? (
+                    <div className="flex items-center justify-center py-20">
+                      <Loader2 className="animate-spin text-gold" size={32} />
+                    </div>
+                  ) : orders.length > 0 ? (
+                    <div className="space-y-6">
+                      {orders.map((order) => (
+                        <div key={order.id} className="bg-stone-50/50 border border-beige p-6 sm:p-8 space-y-6">
+                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-beige pb-6">
+                            <div>
+                              <p className="text-[10px] font-bold text-gold uppercase tracking-widest mb-1">{order.orderId}</p>
+                              <p className="text-[8px] text-gray-400 uppercase tracking-widest">
+                                Placed on {order.createdAt?.toDate().toLocaleDateString('en-KE', { day: '2-digit', month: 'short', year: 'numeric' })}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                              <div className="text-right">
+                                <p className="text-[8px] text-gray-400 uppercase tracking-widest mb-1">Total Amount</p>
+                                <p className="text-sm font-bold text-primary">KES {order.total.toLocaleString()}</p>
+                              </div>
+                              <span className={cn(
+                                "px-4 py-1.5 rounded-none text-[8px] font-black uppercase tracking-widest border shadow-sm",
+                                order.status === 'Delivered' ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
+                                order.status === 'Cancelled' ? "bg-red-50 text-red-600 border-red-100" :
+                                "bg-amber-50 text-amber-600 border-amber-100 animate-pulse"
+                              )}>
+                                {order.status}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="space-y-4">
+                              <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Package Items</p>
+                              <div className="flex flex-wrap gap-4">
+                                {order.items.map((item: any, idx: number) => (
+                                  <div key={idx} className="group relative w-16 h-20 bg-white border border-beige p-1">
+                                    <img src={item.image} alt={item.name} className="w-full h-full object-cover grayscale" />
+                                    <div className="absolute inset-0 bg-primary/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-1 text-center">
+                                      <p className="text-[6px] text-white font-bold leading-tight">{item.name}</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="space-y-4">
+                              <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Live Tracking</p>
+                              <div className="relative pt-2">
+                                <div className="absolute top-4 left-0 w-full h-0.5 bg-beige" />
+                                <div 
+                                  className="absolute top-4 left-0 h-0.5 bg-gold transition-all duration-1000" 
+                                  style={{ 
+                                    width: 
+                                      order.status === 'Pending Confirmation' ? '10%' :
+                                      order.status === 'Paid' ? '30%' :
+                                      order.status === 'Processing' ? '60%' :
+                                      order.status === 'Out for Delivery' ? '85%' :
+                                      order.status === 'Delivered' ? '100%' : '0%'
+                                  }} 
+                                />
+                                <div className="flex justify-between relative">
+                                  <div className="flex flex-col items-center gap-2">
+                                    <div className={cn("w-4 h-4 rounded-full border-2 bg-white z-10", order.createdAt ? "border-gold" : "border-beige")} />
+                                    <span className="text-[7px] font-black uppercase tracking-widest text-stone-400">Placed</span>
+                                  </div>
+                                  <div className="flex flex-col items-center gap-2">
+                                    <div className={cn("w-4 h-4 rounded-full border-2 bg-white z-10", ['Paid', 'Processing', 'Out for Delivery', 'Delivered'].includes(order.status) ? "border-gold" : "border-beige")} />
+                                    <span className="text-[7px] font-black uppercase tracking-widest text-stone-400">Paid</span>
+                                  </div>
+                                  <div className="flex flex-col items-center gap-2">
+                                    <div className={cn("w-4 h-4 rounded-full border-2 bg-white z-10", ['Processing', 'Out for Delivery', 'Delivered'].includes(order.status) ? "border-gold" : "border-beige")} />
+                                    <span className="text-[7px] font-black uppercase tracking-widest text-stone-400">Shipped</span>
+                                  </div>
+                                  <div className="flex flex-col items-center gap-2">
+                                    <div className={cn("w-4 h-4 rounded-full border-2 bg-white z-10", order.status === 'Delivered' ? "border-emerald-500 bg-emerald-500" : "border-beige")} />
+                                    <span className="text-[7px] font-black uppercase tracking-widest text-stone-400">Ready</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-20 border-2 border-dashed border-beige">
+                      <ShoppingBag className="mx-auto text-stone-200 mb-4" size={48} />
+                      <p className="text-sm text-gray-500 font-light mb-8">You haven't placed any orders yet.</p>
+                      <Link 
+                        to="/shop" 
+                        className="inline-block bg-primary text-white text-[10px] uppercase tracking-[0.2em] font-bold px-8 py-4 hover:bg-gold transition-colors"
+                      >
+                        Start Your Journey
+                      </Link>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

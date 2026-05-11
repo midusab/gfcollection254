@@ -16,7 +16,7 @@ export default function Footer() {
               </div>
             </div>
             <p className="text-sm font-light text-white/50 leading-relaxed font-sans">
-              Kenya's premier luxury destination for sophisticated office wear, exquisite dinner dresses, and breathtaking event attire. Hand-picked pieces for the modern woman who values elegance.
+              Kenya's premier luxury destination for sophisticated official wear, effortless casuals, and breathtaking photoshoot gowns. Hand-picked pieces for the modern woman who values elegance.
             </p>
             <div className="flex gap-6 items-center">
               <a href="https://wa.me/254740275625" className="text-white/40 hover:text-gold transition-colors font-bold text-xs uppercase tracking-[0.2em] flex items-center gap-2">
@@ -30,9 +30,10 @@ export default function Footer() {
           <div>
             <h4 className="text-gold font-bold mb-10 text-[10px] uppercase tracking-[0.4em]">Departments</h4>
             <ul className="space-y-5 text-xs font-light tracking-widest uppercase">
-              <li><Link to="/shop?category=Office+Wear" className="hover:text-gold transition-colors">Office Wear</Link></li>
-              <li><Link to="/shop?category=Dinner+Dresses" className="hover:text-gold transition-colors">Dinner & Gala</Link></li>
-              <li><Link to="/shop?category=Event+Wear" className="hover:text-gold transition-colors">Weddings & Events</Link></li>
+              <li><Link to="/shop?category=Clothing&subcategory=Official" className="hover:text-gold transition-colors">Official Wear</Link></li>
+              <li><Link to="/shop?category=Clothing&subcategory=Casuals" className="hover:text-gold transition-colors">Casuals</Link></li>
+              <li><Link to="/shop?category=Clothing&subcategory=Photoshoot" className="hover:text-gold transition-colors">Photoshoot Gowns</Link></li>
+              <li><Link to="/shop?category=Clothing&subcategory=Birthday+Dresses" className="hover:text-gold transition-colors">Birthday Dresses</Link></li>
               <li><Link to="/shop?category=Accessories" className="hover:text-gold transition-colors">Luxury Accessories</Link></li>
             </ul>
           </div>

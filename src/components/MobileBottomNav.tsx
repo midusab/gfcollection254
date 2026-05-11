@@ -20,7 +20,7 @@ export default function MobileBottomNav() {
   ];
 
   const categories = [
-    { name: 'Dresses', path: '/shop?category=Dresses', color: 'bg-stone-50', icon: Sparkles },
+    { name: 'Dresses', path: '/shop?category=Clothing', color: 'bg-stone-50', icon: Sparkles },
     { name: 'Shoes', path: '/shop?category=Shoes', color: 'bg-stone-50', icon: Footprints },
     { name: 'Bags', path: '/shop?category=Bags', color: 'bg-stone-50', icon: ShoppingBag },
     { name: 'Collections', path: '/shop', color: 'bg-stone-50', icon: Layers },

@@ -81,22 +81,25 @@ export default function AdminDashboard() {
   const StatCard = ({ title, value, icon: Icon, color, trend }: any) => (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-white p-6 luxury-shadow relative overflow-hidden group"
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="bg-white p-6 sm:p-8 luxury-shadow relative overflow-hidden group border border-stone-50 hover:border-gold/20 transition-all duration-500"
     >
-      <div className={cn("absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 opacity-5 transition-transform group-hover:scale-110", color)}>
-        <Icon size={96} />
+      <div className={cn("absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 opacity-[0.03] transition-transform duration-700 group-hover:scale-110 group-hover:opacity-[0.06]", color)}>
+        <Icon size={128} />
       </div>
-      <div className="flex items-center gap-4 mb-4">
-        <div className={cn("p-3 rounded-xl", color.replace('text-', 'bg-').replace('500', '50'))}>
+      <div className="flex items-center gap-4 mb-6">
+        <div className={cn("p-3 rounded-2xl transition-colors duration-500", color.replace('text-', 'bg-').replace('500', '50').replace('600', '50'))}>
           <Icon size={20} className={color} />
         </div>
-        <p className="text-[10px] uppercase tracking-[0.2em] font-black text-stone-400">{title}</p>
+        <p className="text-[10px] uppercase tracking-[0.3em] font-black text-stone-400">{title}</p>
       </div>
-      <div className="flex items-end justify-between">
-        <h3 className="text-3xl font-display text-primary">{typeof value === 'number' && title.includes('Revenue') ? `KES ${value.toLocaleString()}` : value}</h3>
+      <div className="flex items-end justify-between relative z-10">
+        <h3 className="text-3xl sm:text-4xl font-display text-primary tracking-tight">
+          {typeof value === 'number' && (title.includes('Revenue') || title.includes('Sales')) ? `KES ${value.toLocaleString()}` : value}
+        </h3>
         {trend && (
-           <div className={cn("flex items-center gap-1 text-[10px] font-bold", trend > 0 ? "text-emerald-500" : "text-stone-300")}>
+           <div className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black tracking-widest", trend > 0 ? "bg-emerald-50 text-emerald-600" : "bg-stone-50 text-stone-400")}>
              {trend > 0 ? <TrendingUp size={12} /> : <Clock size={12} />}
              <span>{trend > 0 ? `+${trend}%` : 'Stable'}</span>
            </div>
@@ -112,64 +115,74 @@ export default function AdminDashboard() {
         <p className="text-xs text-stone-400 uppercase tracking-widest font-bold">Real-time performance metrics</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard title="Today's Revenue" value={stats.todayRevenue} icon={DollarSign} color="text-gold" trend={12} />
         <StatCard title="Monthly Revenue" value={stats.monthlyRevenue} icon={TrendingUp} color="text-primary" trend={8} />
-        <StatCard title="Pending Payments" value={stats.pendingPayments} icon={Clock} color="text-amber-500" />
+        <StatCard title="Pending Orders" value={stats.pendingPayments} icon={Clock} color="text-amber-500" />
         <StatCard title="Total Orders" value={stats.totalOrders} icon={ShoppingBag} color="text-stone-500" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-white p-8 luxury-shadow space-y-8">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <div className="xl:col-span-2 bg-white p-6 sm:p-10 luxury-shadow space-y-10 border border-stone-50">
           <div className="flex justify-between items-center">
             <div>
-              <h3 className="text-lg font-display text-primary">Revenue Trends</h3>
-              <p className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Past 7 Days Performance</p>
+              <h3 className="text-2xl font-display text-primary">Revenue Trends</h3>
+              <p className="text-[10px] uppercase tracking-[0.4em] text-stone-300 font-black mt-1">7-Day Performance Analysis</p>
             </div>
-            <div className="flex gap-4">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-gold" />
-                <span className="text-[10px] font-bold text-stone-400 uppercase">Revenue (KES)</span>
+            <div className="hidden sm:flex gap-6">
+              <div className="flex items-center gap-3">
+                <div className="w-2.5 h-2.5 rounded-full bg-gold shadow-sm" />
+                <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest">Gross Revenue (KES)</span>
               </div>
             </div>
           </div>
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={revenueData}>
-                <defs>
-                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#C5A059" stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor="#C5A059" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                <XAxis 
-                  dataKey="name" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 10, fontWeight: 700, fill: '#A8A29E' }}
-                />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 10, fontWeight: 700, fill: '#A8A29E' }}
-                  tickFormatter={(val) => `KES ${val >= 1000 ? (val/1000)+'k' : val}`}
-                />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#fff', border: '1px solid #f0f0f0', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
-                  labelStyle={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', color: '#1C1C1C' }}
-                  itemStyle={{ fontSize: 12, fontWeight: 600, color: '#C5A059' }}
-                />
-                <Area type="monotone" dataKey="value" stroke="#C5A059" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" />
-              </AreaChart>
-            </ResponsiveContainer>
+          <div className="h-[350px] w-full pt-4">
+            {revenueData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={revenueData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#C5A059" stopOpacity={0.15}/>
+                      <stop offset="95%" stopColor="#C5A059" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f5" />
+                  <XAxis 
+                    dataKey="name" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fontSize: 9, fontWeight: 800, fill: '#D6D3D1', letterSpacing: 1 }}
+                    dy={15}
+                  />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fontSize: 9, fontWeight: 800, fill: '#D6D3D1' }}
+                    tickFormatter={(val) => `${val >= 1000 ? (val/1000)+'k' : val}`}
+                    dx={-10}
+                  />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#fff', border: 'none', borderRadius: '0', boxShadow: '20px 20px 60px #d9d9d9, -20px -20px 60px #ffffff' }}
+                    labelStyle={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', color: '#1C1C1C', letterSpacing: 2, marginBottom: 8 }}
+                    itemStyle={{ fontSize: 12, fontWeight: 600, color: '#C5A059' }}
+                    formatter={(value: any) => [`KES ${value.toLocaleString()}`, 'Revenue']}
+                  />
+                  <Area type="monotone" dataKey="value" stroke="#C5A059" strokeWidth={4} fillOpacity={1} fill="url(#colorValue)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-stone-200 gap-4">
+                <TrendingUp size={48} strokeWidth={1} />
+                <p className="text-[10px] font-black uppercase tracking-[0.4em]">Awaiting Sales Data</p>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="bg-white p-8 luxury-shadow space-y-8">
+        <div className="bg-white p-6 sm:p-10 luxury-shadow space-y-10 border border-stone-50">
            <div>
-              <h3 className="text-lg font-display text-primary">Operations Status</h3>
-              <p className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Logistics & Fulfilment</p>
+              <h3 className="text-2xl font-display text-primary">Operations</h3>
+              <p className="text-[10px] uppercase tracking-[0.4em] text-stone-300 font-black mt-1">Logistics Status</p>
             </div>
             
             <div className="space-y-6">
