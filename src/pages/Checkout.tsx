@@ -141,9 +141,9 @@ Please confirm availability and payment details.`;
       // Open WhatsApp
       window.open(waLink, '_blank');
 
-      // Clear Cart and Redirect
+      // Clear Cart and Redirect to Thank You Page
       clearCart();
-      navigate('/shop'); 
+      navigate('/thank-you', { state: { orderData } }); 
       
     } catch (error) {
       console.error('Order submission failed:', error);

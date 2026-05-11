@@ -318,48 +318,61 @@ export default function Profile() {
 
                               {/* M-Pesa Verification Section */}
                               {order.status === 'Pending Confirmation' && !order.mpesaCode && (
-                                <div className="mt-8 p-6 bg-emerald-50/50 border border-emerald-100 space-y-4">
+                                <div className="mt-8 p-6 bg-emerald-50/50 border border-emerald-100 space-y-6">
                                   <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center">
-                                      <CreditCard size={16} />
+                                    <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center">
+                                      <CreditCard size={20} />
                                     </div>
                                     <div>
                                       <p className="text-[10px] font-black text-emerald-700 uppercase tracking-widest">Payment Required</p>
-                                      <p className="text-[8px] text-emerald-600 uppercase tracking-widest">Submit M-Pesa code to verify</p>
+                                      <p className="text-[8px] text-emerald-600 uppercase tracking-widest">Complete payment to start processing</p>
                                     </div>
                                   </div>
-                                  <div className="flex gap-2">
-                                    <input 
-                                      type="text" 
-                                      placeholder="ENTER MPESA CODE (e.g. SAK9...)"
-                                      id={`mpesa-input-${order.id}`}
-                                      className="flex-1 px-4 py-2 bg-white border border-emerald-200 text-xs font-bold uppercase tracking-widest focus:outline-none focus:border-emerald-500"
-                                    />
-                                    <button 
-                                      onClick={async () => {
-                                        const input = document.getElementById(`mpesa-input-${order.id}`) as HTMLInputElement;
-                                        const code = input.value.toUpperCase().trim();
-                                        if (code.length < 8) return alert('Please enter a valid M-Pesa transaction code');
-                                        
-                                        try {
-                                          const orderRef = doc(db, 'orders', order.id);
-                                          await updateDoc(orderRef, {
-                                            mpesaCode: code,
-                                            updatedAt: serverTimestamp()
-                                          });
-                                          alert('Code submitted! Our team will verify it shortly.');
-                                        } catch (error) {
-                                          console.error('Submission failed:', error);
-                                        }
-                                      }}
-                                      className="bg-emerald-500 text-white px-6 py-2 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all"
-                                    >
-                                      Submit
-                                    </button>
+
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-emerald-100">
+                                    <div className="space-y-1">
+                                      <p className="text-[8px] text-emerald-600 font-bold uppercase tracking-widest">Send Funds To:</p>
+                                      <p className="text-sm font-display text-primary">{PAYMENT_DETAILS.type}</p>
+                                      <p className="text-xl font-display text-gold tracking-tight">{PAYMENT_DETAILS.number}</p>
+                                      <p className="text-[8px] text-stone-400 font-bold uppercase tracking-widest">Name: {PAYMENT_DETAILS.name}</p>
+                                    </div>
+                                    
+                                    <div className="space-y-4">
+                                      <input 
+                                        type="text" 
+                                        placeholder="MPESA CODE (e.g. SAK9...)"
+                                        id={`mpesa-input-${order.id}`}
+                                        className="w-full px-4 py-3 bg-white border border-emerald-200 text-xs font-bold uppercase tracking-widest focus:outline-none focus:border-emerald-500 shadow-sm"
+                                      />
+                                      <button 
+                                        onClick={async () => {
+                                          const input = document.getElementById(`mpesa-input-${order.id}`) as HTMLInputElement;
+                                          const code = input.value.toUpperCase().trim();
+                                          if (code.length < 8) return alert('Please enter a valid M-Pesa transaction code');
+                                          
+                                          try {
+                                            const orderRef = doc(db, 'orders', order.id);
+                                            await updateDoc(orderRef, {
+                                              mpesaCode: code,
+                                              updatedAt: serverTimestamp()
+                                            });
+                                            alert('Code submitted! Our team will verify it shortly.');
+                                          } catch (error) {
+                                            console.error('Submission failed:', error);
+                                          }
+                                        }}
+                                        className="w-full bg-emerald-500 text-white py-3 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-md"
+                                      >
+                                        Submit Transaction Code
+                                      </button>
+                                    </div>
                                   </div>
-                                  <p className="text-[7px] text-emerald-600 leading-relaxed font-bold uppercase tracking-tighter">
-                                    * Payments are processed manually via Pochi la Biashara. Please allow 5-15 mins for verification.
-                                  </p>
+                                  
+                                  <div className="pt-4 border-t border-emerald-100">
+                                    <p className="text-[7px] text-emerald-600 leading-relaxed font-bold uppercase tracking-tighter">
+                                      * Payments are processed manually via Pochi la Biashara. Please allow 5-15 mins for verification.
+                                    </p>
+                                  </div>
                                 </div>
                               )}
                             </div>
