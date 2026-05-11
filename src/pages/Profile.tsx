@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, Calendar, Heart, ShoppingBag, Settings, LogOut, Loader2, Camera, CreditCard } from 'lucide-react';
+import { User, Mail, Calendar, Heart, ShoppingBag, Settings, LogOut, Loader2, Camera, CreditCard, MessageCircle } from 'lucide-react';
 import { collection, query, where, onSnapshot, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { products } from '../mockData';
@@ -357,14 +357,19 @@ export default function Profile() {
                                               mpesaCode: code,
                                               updatedAt: serverTimestamp()
                                             });
-                                            alert('Code submitted! Our team will verify it shortly.');
+                                            alert('Code submitted! Opening WhatsApp to share confirmation...');
+                                            
+                                            // Open WhatsApp with confirmation message
+                                            const message = encodeURIComponent(`Hello GF Collection! 👗\n\nI have just paid for my order.\nOrder ID: ${order.orderId}\nM-Pesa Code: ${code}\n\nPlease verify and process my shipment.`);
+                                            window.open(`https://wa.me/254740275625?text=${message}`, '_blank');
                                           } catch (error) {
                                             console.error('Submission failed:', error);
                                           }
                                         }}
-                                        className="w-full bg-emerald-500 text-white py-3 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-md"
+                                        className="w-full bg-emerald-500 text-white py-3 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-md flex items-center justify-center gap-2"
                                       >
-                                        Submit Transaction Code
+                                        <MessageCircle size={14} />
+                                        Submit & Confirm on WhatsApp
                                       </button>
                                     </div>
                                   </div>
