@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, MessageCircle, CreditCard, ShieldCheck, Truck } from 'lucide-react';
+import logo from '../assets/logo.png';
 
 export default function Footer() {
   return (
@@ -9,11 +10,7 @@ export default function Footer() {
           {/* Brand & Slogan */}
           <div className="space-y-8">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-gold rounded-full flex items-center justify-center text-primary font-display font-bold">GF</div>
-              <div className="flex flex-col">
-                <span className="text-xl font-display font-medium tracking-[0.2em] text-white uppercase">GF</span>
-                <span className="text-[8px] uppercase tracking-[0.3em] text-gold font-bold">The Power House of Fashion</span>
-              </div>
+              <img src={logo} alt="GF Collection" className="h-16 w-auto object-contain brightness-0 invert" />
             </div>
             <p className="text-sm font-light text-white/50 leading-relaxed font-sans">
               Kenya's premier luxury destination for sophisticated official wear, effortless casuals, and breathtaking photoshoot gowns. Hand-picked pieces for the modern woman who values elegance.

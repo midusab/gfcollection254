@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { db } from '../lib/firebase';
+import logo from '../assets/logo.png';
+import { collection, query, orderBy, onSnapshot, where, limit } from 'firebase/firestore';
 import { 
   LayoutDashboard, 
   ShoppingBag, 
@@ -38,6 +41,8 @@ export default function Admin() {
   const { user, logout } = useAuth();
   const [activeModule, setActiveModule] = useState<ActiveModule>('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   // Handle mobile responsiveness
   useEffect(() => {
@@ -51,6 +56,50 @@ export default function Admin() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Listen for Admin Notifications (Orders & Stock)
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    // 1. Listen for New Orders
+    const ordersQuery = query(collection(db, 'orders'), orderBy('createdAt', 'desc'), limit(10));
+    const unsubscribeOrders = onSnapshot(ordersQuery, (snapshot) => {
+      const newOrders = snapshot.docs.map(doc => ({
+        id: doc.id,
+        type: 'order',
+        title: 'New Order Placed',
+        description: `Order ${doc.data().orderId} from ${doc.data().fullName}`,
+        time: doc.data().createdAt?.toDate() || new Date(),
+        read: false
+      }));
+      setNotifications(prev => {
+        const otherNotifs = prev.filter(n => n.type !== 'order');
+        return [...newOrders, ...otherNotifs].sort((a, b) => b.time - a.time);
+      });
+    });
+
+    // 2. Listen for Low Stock
+    const productsQuery = query(collection(db, 'products'), where('stockQuantity', '<', 5));
+    const unsubscribeProducts = onSnapshot(productsQuery, (snapshot) => {
+      const lowStockNotifs = snapshot.docs.map(doc => ({
+        id: doc.id,
+        type: 'stock',
+        title: 'Low Stock Alert',
+        description: `${doc.data().name} has only ${doc.data().stockQuantity} units left`,
+        time: new Date(),
+        read: false
+      }));
+      setNotifications(prev => {
+        const otherNotifs = prev.filter(n => n.type !== 'stock');
+        return [...lowStockNotifs, ...otherNotifs].sort((a, b) => b.time - a.time);
+      });
+    });
+
+    return () => {
+      unsubscribeOrders();
+      unsubscribeProducts();
+    };
+  }, [isAdmin]);
 
   // Admin authorization
   const isAdmin = user?.email === 'gfcollection@gmail.com'; 
@@ -110,7 +159,7 @@ export default function Admin() {
       >
         <div className="h-24 flex items-center justify-between px-8 border-b border-stone-50 overflow-hidden">
           <div className="flex items-center gap-3">
-             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-black text-xl">G</div>
+             <img src={logo} alt="Logo" className="w-10 h-10 object-contain" />
              <div className={cn("transition-opacity duration-300 whitespace-nowrap", !isSidebarOpen && "lg:opacity-0")}>
                <h1 className="font-display text-xl text-primary">Admin Panel</h1>
                <p className="text-[8px] font-black uppercase tracking-[0.2em] text-gold">GF Collection</p>
@@ -198,8 +247,73 @@ export default function Admin() {
 
           <div className="flex items-center gap-6">
             <div className="relative">
-              <Bell size={20} className="text-stone-300" />
-              <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-gold border-2 border-white rounded-full" />
+              <button 
+                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                className={cn(
+                  "p-2 rounded-xl transition-all relative",
+                  isNotificationsOpen ? "bg-stone-50 text-gold" : "text-stone-300 hover:text-primary"
+                )}
+              >
+                <Bell size={20} />
+                {notifications.some(n => !n.read) && (
+                  <div className="absolute top-2 right-2 w-2 h-2 bg-red-500 border-2 border-white rounded-full" />
+                )}
+              </button>
+
+              <AnimatePresence>
+                {isNotificationsOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setIsNotificationsOpen(false)} 
+                    />
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute right-0 mt-4 w-80 bg-white luxury-shadow-lg border border-stone-100 z-50 overflow-hidden"
+                    >
+                      <div className="p-4 border-b border-stone-50 flex items-center justify-between">
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Notification Center</h3>
+                        <span className="text-[8px] bg-gold/10 text-gold px-2 py-0.5 font-bold uppercase tracking-widest">{notifications.length} Alerts</span>
+                      </div>
+                      
+                      <div className="max-h-[400px] overflow-y-auto no-scrollbar">
+                        {notifications.length > 0 ? (
+                          notifications.map((n) => (
+                            <div key={n.id} className="p-4 border-b border-stone-50 hover:bg-stone-50 transition-colors group cursor-pointer">
+                              <div className="flex gap-4">
+                                <div className={cn(
+                                  "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
+                                  n.type === 'order' ? "bg-emerald-50 text-emerald-500" : "bg-red-50 text-red-500"
+                                )}>
+                                  {n.type === 'order' ? <ShoppingBag size={14} /> : <Package size={14} />}
+                                </div>
+                                <div className="flex-1 space-y-0.5">
+                                  <p className="text-[10px] font-bold text-primary group-hover:text-gold transition-colors">{n.title}</p>
+                                  <p className="text-[9px] text-stone-400 line-clamp-2">{n.description}</p>
+                                  <p className="text-[7px] text-stone-300 font-bold uppercase tracking-widest pt-1">
+                                    {n.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="p-12 text-center">
+                            <Bell className="mx-auto text-stone-100 mb-4" size={32} />
+                            <p className="text-[8px] uppercase tracking-widest font-black text-stone-300">All systems clear</p>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <button className="w-full py-3 bg-stone-50 text-[8px] font-black uppercase tracking-widest text-stone-400 hover:text-primary hover:bg-stone-100 transition-all border-t border-stone-100">
+                        View All Activity
+                      </button>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
             </div>
             <div className="h-8 w-px bg-stone-100" />
             <div className="flex items-center gap-3">

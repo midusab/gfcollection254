@@ -5,6 +5,7 @@ import { useCartStore } from '../store';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../context/AuthContext';
+import logo from '../assets/logo.png';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -105,12 +106,14 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto flex justify-between items-center gap-8">
         {/* Logo Left */}
         <Link to="/" className="flex-shrink-0 flex flex-col group">
-          <span className={cn(
-            "text-2xl md:text-3xl font-display font-medium tracking-[0.2em] transition-colors uppercase",
-            isScrolled || !isHome ? "text-primary" : "text-white"
-          )}>
-            GF
-          </span>
+          <img 
+            src={logo} 
+            alt="GF Collection" 
+            className={cn(
+              "h-10 md:h-12 w-auto object-contain transition-all",
+              isScrolled || !isHome ? "brightness-100" : "brightness-0 invert"
+            )} 
+          />
           <span className={cn(
             "text-[8px] md:text-[9px] uppercase tracking-[0.4em] font-bold transition-colors",
             isScrolled || !isHome ? "text-gold" : "text-white/80"
