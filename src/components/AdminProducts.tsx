@@ -13,6 +13,7 @@ interface Product {
   price: number;
   discountPrice?: number;
   category: string;
+  subcategory?: string;
   stockQuantity: number;
   image: string;
   images: string[];
@@ -24,6 +25,13 @@ interface Product {
   status: 'published' | 'draft' | 'out_of_stock';
   tags: string[];
 }
+
+const SUBCATEGORIES: Record<string, string[]> = {
+  'Clothing': ['Dinner Dresses', 'Office Dresses', 'Event Dresses', 'Birthday Dresses', 'Bodycon Dresses', 'Maxi Dresses', 'Casual Dresses'],
+  'Shoes': ['Heels', 'Official Shoes', 'Sneakers', 'Sandals', 'Boots', 'Luxury Heels'],
+  'Bags': ['Handbags', 'Office Bags', 'Mini Bags', 'Luxury Bags', 'Crossbody Bags', 'Party Bags', 'Travel Bags'],
+  'Accessories': ['Jewelry', 'Belts', 'Hats', 'Others']
+};
 
 export default function AdminProducts() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -40,6 +48,7 @@ export default function AdminProducts() {
     price: 0,
     discountPrice: 0,
     category: 'Clothing',
+    subcategory: 'Dinner Dresses',
     stockQuantity: 0,
     image: '',
     images: [],
@@ -54,6 +63,15 @@ export default function AdminProducts() {
 
   useEffect(() => {
     const q = query(collection(db, 'products'));
+    
+    // Safety timeout for initial load
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        setLoading(false);
+        showNotification('Database connection is taking too long. Check your network or ad-blocker.', 'error');
+      }
+    }, 7000);
+
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const productsData = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -61,36 +79,57 @@ export default function AdminProducts() {
       })) as Product[];
       setProducts(productsData);
       setLoading(false);
+      clearTimeout(timeoutId);
+    }, (error) => {
+      console.error('Initial load error:', error);
+      setLoading(false);
+      clearTimeout(timeoutId);
+      showNotification(`Connection Error: ${error.message}`, 'error');
     });
-    return () => unsubscribe();
+
+    return () => {
+      unsubscribe();
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        setLoading(false);
+        showNotification('Connection timed out. Please check your internet or ad-blocker.', 'error');
+      }
+    }, 10000);
+
     try {
       const data = {
         ...formData,
         updatedAt: serverTimestamp(),
       };
 
+      console.log("Attempting to save product data:", data);
+
       if (editingProduct) {
         await updateDoc(doc(db, 'products', editingProduct.id), data);
         showNotification('Product updated successfully', 'success');
       } else {
-        await addDoc(collection(db, 'products'), {
+        const docRef = await addDoc(collection(db, 'products'), {
           ...data,
           createdAt: serverTimestamp(),
         });
+        console.log("Product created with ID:", docRef.id);
         showNotification('Product added successfully', 'success');
       }
       setIsModalOpen(false);
       setEditingProduct(null);
       resetForm();
-    } catch (error) {
-      console.error('Error saving product:', error);
-      showNotification('Failed to save product', 'error');
+    } catch (error: any) {
+      console.error('Full Error Object:', error);
+      showNotification(`Failed to save: ${error.message}`, 'error');
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
@@ -142,8 +181,8 @@ export default function AdminProducts() {
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-display text-primary">Catalog Management</h2>
-          <p className="text-xs text-stone-400 uppercase tracking-widest font-bold">Manage your product inventory</p>
+          <h2 className="text-2xl font-display text-primary">Manage Products</h2>
+          <p className="text-xs text-stone-400 uppercase tracking-widest font-bold">Add and update your product collection</p>
         </div>
         <button 
           onClick={() => { resetForm(); setEditingProduct(null); setIsModalOpen(true); }}
@@ -159,7 +198,7 @@ export default function AdminProducts() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300" size={16} />
           <input 
             type="text" 
-            placeholder="Search catalog..." 
+            placeholder="Search products..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-12 pr-4 py-3 bg-white border border-stone-100 luxury-shadow-sm focus:outline-none focus:border-gold text-xs font-bold uppercase tracking-widest"
@@ -318,18 +357,39 @@ export default function AdminProducts() {
 
                     {/* Meta & Inventory */}
                     <div className="space-y-6">
-                      <div className="space-y-2">
-                        <label className="text-[10px] uppercase font-black tracking-widest text-stone-400 ml-1">Category</label>
-                        <select 
-                          value={formData.category}
-                          onChange={(e) => setFormData({...formData, category: e.target.value})}
-                          className="w-full bg-stone-50 border border-stone-100 p-4 text-sm focus:outline-none focus:border-gold"
-                        >
-                          <option value="Clothing">Clothing</option>
-                          <option value="Accessories">Accessories</option>
-                          <option value="Bags">Bags</option>
-                          <option value="Shoes">Shoes</option>
-                        </select>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-[10px] uppercase font-black tracking-widest text-stone-400 ml-1">Category</label>
+                          <select 
+                            value={formData.category}
+                            onChange={(e) => {
+                              const newCat = e.target.value;
+                              setFormData({
+                                ...formData, 
+                                category: newCat,
+                                subcategory: SUBCATEGORIES[newCat]?.[0] || ''
+                              });
+                            }}
+                            className="w-full bg-stone-50 border border-stone-100 p-4 text-sm focus:outline-none focus:border-gold"
+                          >
+                            <option value="Clothing">Clothing</option>
+                            <option value="Accessories">Accessories</option>
+                            <option value="Bags">Bags</option>
+                            <option value="Shoes">Shoes</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] uppercase font-black tracking-widest text-stone-400 ml-1">Subcategory</label>
+                          <select 
+                            value={formData.subcategory}
+                            onChange={(e) => setFormData({...formData, subcategory: e.target.value})}
+                            className="w-full bg-stone-50 border border-stone-100 p-4 text-sm focus:outline-none focus:border-gold"
+                          >
+                            {formData.category && SUBCATEGORIES[formData.category]?.map(sub => (
+                              <option key={sub} value={sub}>{sub}</option>
+                            ))}
+                          </select>
+                        </div>
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] uppercase font-black tracking-widest text-stone-400 ml-1">Stock Quantity</label>

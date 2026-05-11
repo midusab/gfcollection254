@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCartStore } from '../store';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../lib/firebase';
@@ -35,8 +35,13 @@ export default function Checkout() {
     notes: ''
   });
 
+  useEffect(() => {
+    if (items.length === 0) {
+      navigate('/cart');
+    }
+  }, [items.length, navigate]);
+
   if (items.length === 0) {
-    navigate('/cart');
     return null;
   }
 
@@ -286,12 +291,12 @@ Please confirm availability and payment details.`;
               <div className="flex items-center justify-center gap-4 pt-4 text-stone-400">
                 <div className="flex items-center gap-2">
                   <ShieldCheck size={14} />
-                  <span className="text-[8px] uppercase tracking-widest font-bold">Secure Verification</span>
+                  <span className="text-[8px] uppercase tracking-widest font-bold">Secure Checkout</span>
                 </div>
                 <div className="w-1 h-1 bg-stone-300 rounded-full" />
                 <div className="flex items-center gap-2">
                   <MessageCircle size={14} />
-                  <span className="text-[8px] uppercase tracking-widest font-bold">Personal Support</span>
+                  <span className="text-[8px] uppercase tracking-widest font-bold">WhatsApp Support</span>
                 </div>
               </div>
             </form>

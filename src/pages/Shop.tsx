@@ -8,6 +8,13 @@ import { motion, AnimatePresence } from 'motion/react';
 
 const CATEGORIES = ['All', 'Clothing', 'Accessories', 'Bags', 'Shoes'];
 
+const SUBCATEGORIES: Record<string, string[]> = {
+  'Clothing': ['Dinner Dresses', 'Office Dresses', 'Event Dresses', 'Birthday Dresses', 'Bodycon Dresses', 'Maxi Dresses', 'Casual Dresses'],
+  'Shoes': ['Heels', 'Official Shoes', 'Sneakers', 'Sandals', 'Boots', 'Luxury Heels'],
+  'Bags': ['Handbags', 'Office Bags', 'Mini Bags', 'Luxury Bags', 'Crossbody Bags', 'Party Bags', 'Travel Bags'],
+  'Accessories': ['Jewelry', 'Belts', 'Hats', 'Others']
+};
+
 export default function Shop() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -15,6 +22,7 @@ export default function Shop() {
   const [loading, setLoading] = useState(true);
   
   const currentCategory = searchParams.get('category') || 'All';
+  const currentSubcategory = searchParams.get('subcategory') || 'All';
   const searchQuery = searchParams.get('search') || '';
   const onSale = searchParams.get('sale') === 'true';
 
@@ -43,14 +51,16 @@ export default function Shop() {
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
       const matchCategory = currentCategory === 'All' || p.category === currentCategory;
+      const matchSubcategory = currentSubcategory === 'All' || p.subcategory === currentSubcategory;
       const matchSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           p.description?.toLowerCase().includes(searchQuery.toLowerCase());
       const matchSale = !onSale || p.onSale;
-      return matchCategory && matchSearch && matchSale;
+      return matchCategory && matchSubcategory && matchSearch && matchSale;
     });
-  }, [currentCategory, searchQuery, onSale, products]);
+  }, [currentCategory, currentSubcategory, searchQuery, onSale, products]);
 
   const toggleCategory = (category: string) => {
+    searchParams.delete('subcategory'); // Reset subcategory when category changes
     if (category === 'All') {
       searchParams.delete('category');
     } else {
@@ -107,19 +117,50 @@ export default function Shop() {
           <aside className="hidden lg:block w-64 space-y-8">
             <div>
               <h3 className="font-bold text-gray-900 mb-4 uppercase tracking-wider text-xs">Categories</h3>
-              <div className="space-y-2">
+              <div className="space-y-4">
                 {CATEGORIES.map(cat => (
-                  <button
-                    key={cat}
-                    onClick={() => toggleCategory(cat)}
-                    className={`w-full text-left px-4 py-2 rounded-lg transition-all ${
-                      currentCategory === cat 
-                        ? 'bg-primary text-white font-bold shadow-md' 
-                        : 'text-gray-600 hover:bg-white hover:text-primary'
-                    }`}
-                  >
-                    {cat}
-                  </button>
+                  <div key={cat} className="space-y-2">
+                    <button
+                      onClick={() => toggleCategory(cat)}
+                      className={`w-full text-left px-4 py-2 rounded-lg transition-all ${
+                        currentCategory === cat 
+                          ? 'bg-primary text-white font-bold shadow-md' 
+                          : 'text-gray-600 hover:bg-white hover:text-primary'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                    
+                    {/* Subcategories */}
+                    {currentCategory === cat && cat !== 'All' && (
+                      <motion.div 
+                        initial={{ opacity: 0, x: 10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="pl-4 space-y-1"
+                      >
+                        {SUBCATEGORIES[cat]?.map(sub => (
+                          <button
+                            key={sub}
+                            onClick={() => {
+                              if (currentSubcategory === sub) {
+                                searchParams.delete('subcategory');
+                              } else {
+                                searchParams.set('subcategory', sub);
+                              }
+                              setSearchParams(searchParams);
+                            }}
+                            className={`w-full text-left px-4 py-1.5 rounded-lg text-[10px] uppercase tracking-widest font-bold transition-all ${
+                              currentSubcategory === sub
+                                ? 'text-gold'
+                                : 'text-gray-400 hover:text-primary'
+                            }`}
+                          >
+                            • {sub}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
@@ -171,7 +212,7 @@ export default function Shop() {
             {loading ? (
               <div className="flex flex-col items-center justify-center py-32 space-y-4">
                 <Loader2 className="w-10 h-10 animate-spin text-gold" />
-                <p className="text-[10px] uppercase tracking-[0.4em] font-black text-stone-300">Synchronizing Catalog</p>
+                <p className="text-[10px] uppercase tracking-[0.4em] font-black text-stone-300">Loading Products...</p>
               </div>
             ) : filteredProducts.length > 0 ? (
               <motion.div 

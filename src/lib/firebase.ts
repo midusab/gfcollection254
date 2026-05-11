@@ -12,6 +12,12 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
+// Log if config is missing (for debugging)
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+  console.error("FATAL ERROR: Firebase environment variables are missing! Check your .env file.");
+  console.log("Loaded Keys:", Object.keys(firebaseConfig).filter(k => !!(firebaseConfig as any)[k]));
+}
+
 // Singleton pattern to prevent duplicate initialization during HMR
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 export const db = getFirestore(app);

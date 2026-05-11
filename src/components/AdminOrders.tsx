@@ -269,16 +269,37 @@ export default function AdminOrders() {
 
                   <div className="space-y-4 pt-6 border-t border-stone-100">
                     <p className="text-[10px] uppercase tracking-[0.2em] font-black text-primary">Financial Verification</p>
-                    <div className="relative">
-                      <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300" size={16} />
-                      <input
-                        type="text"
-                        placeholder="M-Pesa Code"
-                        value={selectedOrder.mpesaCode || ''}
-                        onChange={(e) => updateMpesaCode(selectedOrder.id, e.target.value.toUpperCase())}
-                        className="w-full pl-12 pr-4 py-3 bg-stone-50 border border-stone-100 text-[10px] font-black uppercase tracking-[0.2em] focus:outline-none focus:border-gold placeholder:text-stone-300"
-                      />
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300" size={16} />
+                        <input
+                          key={selectedOrder.id}
+                          type="text"
+                          placeholder="M-Pesa Code"
+                          defaultValue={selectedOrder.mpesaCode || ''}
+                          id="mpesa-input"
+                          className="w-full pl-12 pr-4 py-3 bg-stone-50 border border-stone-100 text-[10px] font-black uppercase tracking-[0.2em] focus:outline-none focus:border-gold placeholder:text-stone-300"
+                        />
+                      </div>
+                      <button 
+                        onClick={() => {
+                          const input = document.getElementById('mpesa-input') as HTMLInputElement;
+                          const code = input.value.toUpperCase();
+                          if (code) {
+                            updateMpesaCode(selectedOrder.id, code);
+                            updateOrderStatus(selectedOrder.id, 'Paid');
+                          }
+                        }}
+                        className="bg-emerald-500 text-white px-4 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all"
+                      >
+                        Verify
+                      </button>
                     </div>
+                    {selectedOrder.mpesaCode && (
+                      <p className="text-[9px] text-emerald-500 font-bold uppercase tracking-widest flex items-center gap-1">
+                        <CheckCircle2 size={10} /> Verified: {selectedOrder.mpesaCode}
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-4 pt-6 border-t border-stone-100">

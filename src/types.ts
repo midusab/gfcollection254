@@ -1,15 +1,24 @@
 export interface Product {
   id: string;
   name: string;
+  description: string;
   price: number;
   originalPrice?: number;
-  category: 'Clothing' | 'Accessories' | 'Shoes' | 'Bags';
+  category: string;
+  subcategory?: string;
+  stockQuantity: number;
   image: string;
-  description: string;
-  rating: number;
-  reviews: number;
+  images: string[];
+  sizes: string[];
+  colors: string[];
+  isFeatured: boolean;
+  isBestSeller: boolean;
+  onSale: boolean;
+  status: 'published' | 'draft' | 'out_of_stock';
+  tags: string[];
+  rating?: number;
+  reviews?: number;
   isNew?: boolean;
-  onSale?: boolean;
 }
 
 export interface CartItem extends Product {

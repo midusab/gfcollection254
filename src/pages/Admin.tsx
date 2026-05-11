@@ -20,6 +20,8 @@ import AdminDashboard from '../components/AdminDashboard';
 import AdminProducts from '../components/AdminProducts';
 import AdminOrders from '../components/AdminOrders';
 import AdminSettings from '../components/AdminSettings';
+import AdminCategories from '../components/AdminCategories';
+import AdminCustomers from '../components/AdminCustomers';
 
 type ActiveModule = 'overview' | 'orders' | 'products' | 'categories' | 'customers' | 'settings';
 
@@ -53,7 +55,7 @@ export default function Admin() {
           </div>
           <h2 className="text-3xl font-display text-primary mb-4">Access Denied</h2>
           <p className="text-stone-400 text-sm leading-relaxed mb-8">
-            You do not have administrative clearance for the GF Collection Control Suite. Please logout and sign in with authorized credentials.
+            You don't have permission to access the Admin Panel. Please sign in with an administrator account.
           </p>
           <button 
             onClick={logout}
@@ -71,12 +73,14 @@ export default function Admin() {
       case 'overview': return <AdminDashboard />;
       case 'products': return <AdminProducts />;
       case 'orders': return <AdminOrders />;
+      case 'categories': return <AdminCategories />;
+      case 'customers': return <AdminCustomers />;
       case 'settings': return <AdminSettings />;
       default: return (
         <div className="bg-white p-20 text-center luxury-shadow">
           <Layers className="mx-auto text-stone-100 mb-6" size={80} />
-          <h3 className="font-display text-2xl text-stone-300">Module Under Construction</h3>
-          <p className="text-[10px] uppercase tracking-widest font-black text-stone-300 mt-2">Coming soon in Phase 2</p>
+          <h3 className="font-display text-2xl text-stone-300">Feature Coming Soon</h3>
+          <p className="text-[10px] uppercase tracking-widest font-black text-stone-300 mt-2">Currently being developed</p>
         </div>
       );
     }
@@ -95,7 +99,7 @@ export default function Admin() {
           <div className="flex items-center gap-3">
              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-black text-xl">G</div>
              <div className={cn("transition-opacity duration-300 whitespace-nowrap", !isSidebarOpen && "lg:opacity-0")}>
-               <h1 className="font-display text-xl text-primary">Control Suite</h1>
+               <h1 className="font-display text-xl text-primary">Admin Panel</h1>
                <p className="text-[8px] font-black uppercase tracking-[0.2em] text-gold">GF Collection</p>
              </div>
           </div>
@@ -164,7 +168,7 @@ export default function Admin() {
               <h2 className="text-xs uppercase tracking-[0.3em] font-black text-stone-300">Status </h2>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-bold text-primary uppercase tracking-widest leading-none">System Operational</span>
+                <span className="text-[10px] font-bold text-primary uppercase tracking-widest leading-none">System Online</span>
               </div>
             </div>
           </div>
@@ -177,8 +181,8 @@ export default function Admin() {
             <div className="h-8 w-px bg-stone-100" />
             <div className="flex items-center gap-3">
               <div className="text-right hidden md:block">
-                <p className="text-xs font-bold text-primary uppercase tracking-widest">{user?.displayName || 'Administrator'}</p>
-                <p className="text-[10px] text-stone-400 font-medium">Platform Controller</p>
+                <p className="text-xs font-bold text-primary uppercase tracking-widest">{user?.displayName || 'Admin'}</p>
+                <p className="text-[10px] text-stone-400 font-medium">Administrator</p>
               </div>
               <div className="w-10 h-10 bg-stone-100 rounded-xl overflow-hidden border border-stone-100">
                 <img src={`https://ui-avatars.com/api/?name=${user?.displayName || 'Admin'}&background=c5a059&color=fff`} alt="Admin" className="w-full h-full object-cover" />

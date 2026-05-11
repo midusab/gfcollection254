@@ -1,14 +1,13 @@
-import { useParams, useNavigate } from 'react-router-dom';
-import { products } from '../mockData';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useCartStore } from '../store';
 import { Star, ShoppingCart, ArrowLeft, ShieldCheck, Truck, RefreshCcw, Heart, Share2, Loader2, Plus, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useEffect, useState, useMemo, Fragment } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { doc, getDoc, setDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, setDoc, deleteDoc, onSnapshot, collection, query, where, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { cn } from '../lib/utils';
-import { Link } from 'react-router-dom';
+import { Product } from '../types';
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -18,30 +17,49 @@ export default function ProductDetails() {
   const [selectedSize, setSelectedSize] = useState('M');
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [recommendations, setRecommendations] = useState<Product[]>([]);
 
-  const product = products.find(p => p.id === id);
+  useEffect(() => {
+    if (!id) return;
 
-  const completeTheLook = useMemo(() => {
-    if (!product) return [];
-    // Curated recommendations based on category
-    const items = [];
-    if (product.category === 'Clothing') {
-      const bag = products.find(p => p.category === 'Bags');
-      const shoes = products.find(p => p.category === 'Shoes');
-      if (bag) items.push(bag);
-      if (shoes) items.push(shoes);
-    } else if (product.category === 'Bags' || product.category === 'Shoes') {
-      const clothing = products.find(p => p.category === 'Clothing');
-      const accessory = products.find(p => p.category === 'Accessories');
-      if (clothing) items.push(clothing);
-      if (accessory) items.push(accessory);
-    } else {
-      const clothing = products.find(p => p.category === 'Clothing');
-      const bag = products.find(p => p.category === 'Bags');
-      if (clothing) items.push(clothing);
-      if (bag) items.push(bag);
-    }
-    return items;
+    const fetchProduct = async () => {
+      setLoading(true);
+      try {
+        const docRef = doc(db, 'products', id);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+          const data = { id: docSnap.id, ...docSnap.data() } as Product;
+          setProduct(data);
+        }
+      } catch (error) {
+        console.error("Error fetching product:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
+  useEffect(() => {
+    if (!product) return;
+
+    const q = query(
+      collection(db, 'products'), 
+      where('category', '==', product.category),
+      where('status', '==', 'published'),
+      limit(5)
+    );
+    
+    const unsubscribeRecs = onSnapshot(q, (snapshot) => {
+      const recs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+      setRecommendations(recs);
+    });
+    
+    return () => unsubscribeRecs();
   }, [product]);
 
   useEffect(() => {
@@ -54,6 +72,17 @@ export default function ProductDetails() {
 
     return unsubscribe;
   }, [user, product]);
+
+  const completeTheLook = recommendations.filter(p => p.id !== product?.id);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-beige space-y-4">
+        <Loader2 className="w-10 h-10 animate-spin text-gold" />
+        <p className="text-[10px] uppercase tracking-[0.4em] font-black text-stone-300">Loading Product...</p>
+      </div>
+    );
+  }
 
   const toggleWishlist = async () => {
     if (!user) {
