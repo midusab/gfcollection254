@@ -37,7 +37,20 @@ const MENU_ITEMS = [
 export default function Admin() {
   const { user, logout } = useAuth();
   const [activeModule, setActiveModule] = useState<ActiveModule>('overview');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
+
+  // Handle mobile responsiveness
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setIsSidebarOpen(false);
+      } else {
+        setIsSidebarOpen(true);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Admin authorization
   const isAdmin = user?.email === 'gfcollection@gmail.com'; 
@@ -95,7 +108,7 @@ export default function Admin() {
           isSidebarOpen ? "w-72" : "w-0 lg:w-24 -translate-x-full lg:translate-x-0"
         )}
       >
-        <div className="h-24 flex items-center px-8 border-b border-stone-50 overflow-hidden">
+        <div className="h-24 flex items-center justify-between px-8 border-b border-stone-50 overflow-hidden">
           <div className="flex items-center gap-3">
              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-black text-xl">G</div>
              <div className={cn("transition-opacity duration-300 whitespace-nowrap", !isSidebarOpen && "lg:opacity-0")}>
@@ -103,13 +116,23 @@ export default function Admin() {
                <p className="text-[8px] font-black uppercase tracking-[0.2em] text-gold">GF Collection</p>
              </div>
           </div>
+          {/* Mobile Close */}
+          <button 
+            onClick={() => setIsSidebarOpen(false)}
+            className="lg:hidden p-2 text-stone-400 hover:text-primary transition-colors"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         <nav className="flex-1 py-8 px-4 space-y-2 overflow-y-auto no-scrollbar">
           {MENU_ITEMS.map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveModule(item.id as ActiveModule)}
+              onClick={() => {
+                setActiveModule(item.id as ActiveModule);
+                if (window.innerWidth < 1024) setIsSidebarOpen(false);
+              }}
               className={cn(
                 "w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all group relative overflow-hidden",
                 activeModule === item.id 
@@ -155,7 +178,7 @@ export default function Admin() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <header className="h-24 bg-white/80 backdrop-blur-md border-b border-stone-100 flex items-center justify-between px-8 sticky top-0 z-50">
+        <header className="h-24 bg-white/80 backdrop-blur-md border-b border-stone-100 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-50">
           <div className="flex items-center gap-6">
             <button 
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
