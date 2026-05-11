@@ -11,7 +11,8 @@ import {
   updateProfile
 } from 'firebase/auth';
 import { auth, db } from '../lib/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { setPersistence, browserLocalPersistence } from 'firebase/auth';
 
 interface AuthContextType {
   user: User | null;
@@ -32,19 +33,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [signInLoading, setSignInLoading] = useState(false);
 
   useEffect(() => {
+    // Set persistence to local
+    setPersistence(auth, browserLocalPersistence).catch(console.error);
+
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         // Ensure user exists in Firestore
         try {
-          const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+          const userRef = doc(db, 'users', currentUser.uid);
+          const userDoc = await getDoc(userRef);
+          
           if (!userDoc.exists()) {
-            await setDoc(doc(db, 'users', currentUser.uid), {
+            await setDoc(userRef, {
               uid: currentUser.uid,
               email: currentUser.email,
               displayName: currentUser.displayName,
               photoURL: currentUser.photoURL,
-              createdAt: new Date().toISOString(),
+              createdAt: serverTimestamp(),
+              lastLogin: serverTimestamp(),
             });
+          } else {
+            // Update last login
+            await setDoc(userRef, { 
+              lastLogin: serverTimestamp() 
+            }, { merge: true });
           }
         } catch (error) {
           console.error("Error syncing user to Firestore:", error);
