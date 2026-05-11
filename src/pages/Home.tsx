@@ -429,14 +429,17 @@ export default function Home() {
             </div>
           </div>
           
-          <div className="relative h-[400px] lg:h-full min-h-[400px] bg-stone-100 overflow-hidden luxury-shadow grayscale-[30%] hover:grayscale-0 transition-all duration-1000">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="flex flex-col items-center">
-                <MapPin size={48} className="text-gold mb-4 animate-bounce" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-primary">MMUST Gate B, Kakamega</span>
-              </div>
-            </div>
-            <img src="https://images.unsplash.com/photo-1524666041070-9d87656c25bb?q=80&w=800&auto=format&fit=crop" className="w-full h-full object-cover opacity-20" alt="Map View" referrerPolicy="no-referrer" />
+          <div className="relative h-[400px] lg:h-full min-h-[400px] bg-stone-100 overflow-hidden luxury-shadow">
+            <iframe 
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15959.03473663456!2d34.7571616!3d0.283392!2m3!1f0!2f0!3f0!3m2!1i1024!2i1026!4f13.1!3m3!1m2!1s0x178101340150393b%3A0xc397223b9f36f3c1!2sMMUST%20GATE%20B%2C%20Kakamega!5e0!3m2!1sen!2ske!4v1715456000000!5m2!1sen!2ske" 
+              width="100%" 
+              height="100%" 
+              style={{ border: 0 }} 
+              allowFullScreen={true} 
+              loading="lazy" 
+              referrerPolicy="no-referrer-when-downgrade"
+              className="grayscale-[30%] hover:grayscale-0 transition-all duration-1000"
+            ></iframe>
           </div>
         </div>
       </section>
